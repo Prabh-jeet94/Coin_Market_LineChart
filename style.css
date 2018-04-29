@@ -1,0 +1,68 @@
+.bar {
+    fill: steelblue;
+}
+
+.bar:hover {
+    fill: rgb(157, 205, 240);
+}
+
+h1 {
+    text-align: center;
+    color: #0C6EB5;
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    min-width: 60px;
+    min-height: 28px;
+    padding: 5px;
+    font: 12px sans-serif;
+    background: rgb(209, 220, 235);
+    border: 0px;
+    border-radius: 5px;
+    pointer-events: none;
+}
+
+.multiselect-container>li>a>label {
+    padding: 4px 20px 3px 20px;
+}
+
+ul, li {
+    list-style: none;
+}
+.dropdown {
+    position: relative;
+}
+
+.coinsDropdown {
+    position: absolute;
+    top: 100%;
+    left: 80px;
+    z-index: 1000;
+    display: none;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, .15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+}
+ul{
+    max-height:100px;
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+button{
+    padding: 5px;
+    border-radius: 5px;
+    background: transparent;
+    cursor: pointer;
+}

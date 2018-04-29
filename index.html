@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+    </head>
+<body>
+    <h1>Coin Market</h1>
+    <p>Last Updated Time:
+        <span id="updated-time"></span>
+    </p>
+    <div class="dropdown">
+        <form>
+            <label>Select coins:</label>
+            <button type="button" id="list-of-coins">Select Coins</button>
+            <ul class="coinsDropdown"></ul>
+            <button type="button" id="btn-save">Submit</button>
+        </form>
+
+    </div>
+    <svg width="1200" height="500" id="chart-area"></svg>
+
+    <!-- loading external libs  -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <!-- script to run -->
+    <script>
+        var svg = d3.select("svg"),
+            margin = { top: 20, right: 20, bottom: 30, left: 40 },
+            width = +svg.attr("width") - margin.left - margin.right,
+            height = +svg.attr("height") - margin.top - margin.bottom;
+
+        var x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+            y = d3.scaleLinear().rangeRound([height, 0]);
+
+        var g = svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // Define the div for the tooltip
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+        /* ajax call to get data from api */
+        function getCrytoCurrencyData() {
+            return $.ajax({
+                url: "https://api.coinmarketcap.com/v1/ticker/",
+                type: "GET",
+            })
+                .done(function (data) {
+                    return data;
+                })
+                .fail(function (error) {
+                    return error;
+                });
+        }
+        /* calling function to show graphs */
+        showGraphs();
+        var coinsData;
+        /* function to show graphs */
+        function showGraphs(filteredData) {
+            $("#chart-area g").empty();
+            getCrytoCurrencyData().then(function (data) {
+                coinsData = data;
+
+                $("#updated-time").text(new Date(data[0].last_updated * 1000));
+                data.map(function (d) {
+                    $(".coinsDropdown").append('<li><label><input type="checkbox" name="coins" value="' + d.id + '">' + d.name + '</label></li>')
+                });
+
+                if (filteredData) {
+                    data = filteredData;
+                }
+                // Scale the range of the data
+                x.domain(data.map(function (d) { return d.name; }));
+                y.domain([d3.min(data, function (d) { return parseInt(d.price_usd); }), d3.max(data, function (d) { return parseInt(d.price_usd); })]);
+
+                /* Add the X Axis */
+                g.append("g")
+                    .attr("class", "axis axis--y")
+                    .attr("transform", "translate(-1, 0)")
+                    .call(d3.axisLeft(y))
+                    .append("text")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", "0.71em")
+                    .attr("text-anchor", "end")
+                    .text("Price (usd)");
+                /* Add the y Axis */
+                g.append("g")
+                    .attr("class", "axis axis--x")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(d3.axisBottom(x))
+                    .selectAll("text")
+                    .attr("y", 0)
+                    .attr("x", 9)
+                    .attr("dy", ".35em")
+                    .attr("transform", "rotate(90)")
+                    .style("text-anchor", "start");
+                /* appending rectangualr bars  */
+                g.selectAll(".bar")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "bar")
+                    .attr("x", function (d) { return x(d.name); })
+                    .attr("y", function (d) { return y(d.price_usd); })
+                    .attr("width", x.bandwidth())
+                    .attr("height", function (d) { return height - y(d.price_usd); })
+                    .on("mouseover", function (d) {
+                        div.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+                        div.html("Coin Name: " + d.name + "<br/>" + "Price (usd): " + d.price_usd)
+                            .style("left", (d3.event.pageX + 5) + "px")
+                            .style("top", (d3.event.pageY - 28) + "px");
+                    })
+                    .on("mouseout", function (d) {
+                        div.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                    });
+            });
+        }
+
+        /* update graphs after every 5 mins */
+        setInterval(function () {
+            showGraphs();
+        }, 300000);
+
+        $(document).ready(function () {
+            $("#btn-save").click(function () {
+                var selectedCoins = [];
+                $.each($("input[name='coins']:checked"), function () {
+                    selectedCoins.push($(this).val());
+                });
+                console.lo
+                var filteredData = _.filter(coinsData, function (val) {
+                    if (selectedCoins.indexOf(val.id) > -1) {
+                        return val;
+                    }
+                });
+                showGraphs(filteredData);
+            });
+            /* hide and show list of coins */
+            $('#list-of-coins').click(function () {
+                $('.coinsDropdown').toggle();
+            });
+        });
+
+    </script>
+</body>
+
+</html>
